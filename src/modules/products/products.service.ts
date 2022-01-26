@@ -376,15 +376,15 @@ export class ProductsService {
         return await this.repository.update(id, { isDeleted: true, sku: '' });
       } else {
         throw new HttpException(
-          'EL PRODUCTO NO SE PUEDE ELIMINAR POR QUE HAY UNA IMAGEN QUE TIENE ESTE PRODUCTO.' +
-            'PARA ELIMINAR EL PRODUCTO DEBE ELIMINAR LA IMAGEN.',
+          'DEBE BORRAR LA IMAGEN DEL PRODUCTO Y LAS ESPECIFICACIONES' +
+            ' PARA ELIMINAR EL PRODUCTO SELECCIONADO.',
           HttpStatus.NOT_ACCEPTABLE,
         );
       }
     } else {
       throw new HttpException(
         'EL PRODUCTO NO SE PUEDE ELIMINAR POR QUE CUENTA CON EXISTENCIA EN INVENTARIO.' +
-          'PARA ELIMINARLO DEBE DESCARGAR LA EXISTENCIA DEL INVENTARIO.',
+          ' PARA ELIMINARLO DEBE DESCARGAR LA EXISTENCIA DEL INVENTARIO.',
         HttpStatus.NOT_ACCEPTABLE,
       );
     }
