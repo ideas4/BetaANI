@@ -1,0 +1,135 @@
+doctype
+html(lang="es")
+    head
+        meta(http-equiv="Content-Type" content="text/html" charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Pedido
+        style(type='text/css'). 
+            table {border-collapse:separate;}
+            a, a:link, a:visited {text-decoration: none; color: #00788a;}
+            a:hover {text-decoration: underline;}
+            h2,h2 a,h2 a:visited,h3,h3 a,h3 a:visited,h4,h5,h6,.t_cht {color:#000 !important;}
+            .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td {line-height: 100%;}
+            .ExternalClass {width: 100%;}
+    body(style="font-size:15px; ")
+        table(cellpadding="0" cellspacing="0" width="80%" style="background-color: #f2f2f2;border-collapse: collapse; font-family:Verdana;") 
+            tr(bgcolor=`${color}`)
+                td(height="75px") 
+            tr 
+                td
+                    img.banner(src=`${banner}`, alt="Gracias por comprar con nosotros", width="100%" height="auto" style="display: block;")
+            tr 
+                td(style="padding: 20px 0px 0px 20px;")
+                    h3 Hola #{cliente.nombre},
+                    p Su orden ha sido ingresada con éxito. 
+            tr(style="font-size:15px;") 
+                td(style="padding: 10px 20px 0px 20px;")
+                    table(cellpadding="0" cellspacing="0" width="80%" style="border-collapse: collapse;") 
+                        tr 
+                            td Fecha de Ingreso 
+                            td #{orden.fecha_creacion}
+                        tr 
+                            td Fecha de Entrega 
+                            td #{orden.fecha_entrega}
+                        tr 
+                            td No. Orden
+                            td #{orden.no_factura}
+                        tr 
+                            td Estado del Pedido 
+                            td #{orden.estado} 
+                        tr 
+                            td Envio 
+                            td #{orden.entrega}
+                        tr 
+                            td No. Guía 
+                            td #{orden.no_guia}
+                        tr 
+                            td Método de Pago  
+                            td #{orden.pago} 
+                        tr 
+                            td Total 
+                            td Q.#{orden.total}
+            tr(style="font-size:15px;") 
+                td(style="padding: 20px 0px 0px 20px;") 
+                    table(cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse;")  
+                        tr 
+                            td 
+                                h4 Información de Facturación
+                                table 
+                                    tr
+                                        td(width="40%") Correo Electrónico 
+                                        td  #{cliente.correo}
+                                    tr 
+                                        td Nombre 
+                                        td #{cliente.nombre}
+                                    tr 
+                                        td Dirección
+                                        td #{cliente.direccion}
+                                    tr
+                                        td Ubicación
+                                        td #{cliente.ubicacion}
+                                    tr 
+                                        td Teléfono
+                                        td #{cliente.telefono}
+                                    tr 
+                                        td NIT
+                                        td #{cliente.nit} 
+                            td
+                                h4 Información de Envío
+                                table(cellpadding="0" cellspacing="0" width="80%" style="border-collapse: collapse;")  
+                                    tr
+                                        td(width="40%") Correo Electrónico 
+                                        td  #{cliente.correo}
+                                    tr 
+                                        td Nombre 
+                                        td #{cliente.nombre}
+                                    tr 
+                                        td Dirección
+                                        td #{cliente.direccion} 
+                                    tr 
+                                        td Teléfono
+                                        td #{cliente.telefono} 
+            tr
+                td(style="padding: 10px 20px 0px 20px; font-size:15px;")
+                    h4 Productos
+                    table(cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse; text-align:center;") 
+                        tr
+                            th Código
+                            th Producto
+                            th Cant
+                            th Precio/unidad
+                            th Descuento
+                            th Total
+                        each val in productos
+                            tr
+                                td #{val.sku}
+                                td #{val.nombre}
+                                td #{val.cantidad}
+                                td Q.#{val.precio}
+                                td Q.#{val.descuento}
+                                td Q.#{(val.cantidad * val.precio)-val.descuento}
+                        tr(style="font-weight:bold;")
+                            td Envío
+                            td
+                            td
+                            td
+                            td
+                            td Q.#{orden.envio}
+                        tr(style="font-weight:bold;")
+                            td Total
+                            td
+                            td
+                            td 
+                            td 
+                            td Q.#{orden.total}
+            tr  
+                td(style="padding: 10px 20px 0px 20px; font-size:15px;") 
+                        p(style="text-align=justify;") #{message} 
+            tr(bgcolor=`${color}`) 
+                td(style="padding: 20px 0px 0px 20px;") 
+                    table(cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse;")   
+                        tr
+                            td(style="text-align:center; color: #ffffff;")
+                                p(style="color: #ffffff; margin:5px; font-weight:bold;") Contáctanos   
+                                a(href="mailto:" style="color:#ffffff; text-decoration:none;margin:5px;") #{empresa.correo} 
+                                p(style="margin:5px;") #{empresa.direccion}             
