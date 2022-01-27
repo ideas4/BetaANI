@@ -773,10 +773,10 @@ export class PdfGeneratorService {
         },
         element.producto.sku,
         element.producto.nombre,
-        'Q.' + element.precio.toFixed(2),
-        'Q.' + element.descuento.toFixed(2),
+        'Q.' + element.precio,
+        'Q.' + element.descuento,
         element.cantidad,
-        'Q.' + subtotal.toFixed(2),
+        'Q.' + subtotal,
       ]);
       contador++;
       total += subtotal;
