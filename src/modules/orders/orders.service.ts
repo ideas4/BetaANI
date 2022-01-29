@@ -749,10 +749,25 @@ export class OrdersService {
       return this.repositoryStore.findOne(1);
     }
   }
-  
 
-  async filterDate(fechaStart: string, fechaEnd: string){
-    return  this.repositoryStore.query(`SELECT * FROM orden WHERE CAST(fecha_confirmacion as Date) BETWEEN STR_TO_DATE('${fechaStart}', '%d-%m-%Y') AND STR_TO_DATE('${fechaEnd}', '%d-%m-%Y')`)
+  async filterDate(fechaStart: string, fechaEnd: string, sucursal: string) {
+    let query = ``;
+    if (sucursal != 'Todas') {
+      query = `SELECT orden.id, orden.fecha_creacion, orden.cliente, u.nombre as NombreU, u.apellido as ApellidoU, s.nombre as sucursalNombre, eo.nombre as estado, orden.total FROM orden
+              left join usuario u on orden.vendedor_id = u.id
+              left join  sucursal s on u.sucursal_id = s.id
+              left join estado_orden eo on orden.estado_orden_id = eo.id
+              WHERE s.nombre = '${sucursal}' AND CAST(fecha_creacion as Date)
+              BETWEEN STR_TO_DATE('${fechaStart} 00:00:00', '%d-%m-%Y %T') AND STR_TO_DATE('${fechaEnd} 23:59:00', '%d-%m-%Y %T');`;
+    } else {
+      query = `SELECT orden.id, orden.fecha_creacion, orden.cliente, u.nombre as NombreU, u.apellido as ApellidoU, s.nombre as sucursalNombre, eo.nombre as estado, orden.total FROM orden
+              left join usuario u on orden.vendedor_id = u.id
+              left join estado_orden eo on orden.estado_orden_id = eo.id
+              left join  sucursal s on u.sucursal_id = s.id
+              WHERE CAST(fecha_creacion as Date)
+              BETWEEN STR_TO_DATE('${fechaStart} 00:00:00', '%d-%m-%Y %T') AND STR_TO_DATE('${fechaEnd} 23:59:00', '%d-%m-%Y %T');`;
+    }
+
+    return this.repositoryStore.query(query);
   }
-
 }

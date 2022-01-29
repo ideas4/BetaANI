@@ -14,7 +14,7 @@ import { QuoteClientEntity } from './entities/quote-client.entity';
 import { CreateQuoteClientDto } from './dto/create-quote-client.dto';
 import { InfoProductsDto } from '../inventory/dto/info-products.dto';
 import { Product } from '../products/entities/product.entity';
-import { EstadoCotizacion } from "../../constants";
+import { EstadoCotizacion } from '../../constants';
 
 @Injectable()
 export class QuoteService {
@@ -219,8 +219,24 @@ export class QuoteService {
     return products;
   }
 
-
-  async filterDate(fechaStart: string, fechaEnd: string){
-    return this.repository.query(`SELECT * FROM cotizacion WHERE CAST(fecha_creacion as Date) BETWEEN STR_TO_DATE('${fechaStart}', '%d-%m-%Y') AND STR_TO_DATE('${fechaEnd}', '%d-%m-%Y')`)
+  async filterDate(fechaStart: string, fechaEnd: string, sucursal: string) {
+    let query = ``;
+    if (sucursal != 'Todas') {
+      query = `SELECT cotizacion.id, cotizacion.fecha_creacion, cotizacion.cliente, u.nombre as NombreU, u.apellido as ApellidoU, ec.nombre as estado, vc.nombre as vigencia FROM cotizacion
+                inner join usuario u on cotizacion.usuario_id = u.id
+                inner join sucursal s on u.sucursal_id = s.id
+                inner join estado_cotizacion ec on cotizacion.estado_id = ec.id
+                inner join vigencia_cotizacion vc on cotizacion.vigencia_id = vc.id
+                WHERE s.nombre = '${sucursal}' AND  CAST(fecha_creacion as Date)
+                BETWEEN STR_TO_DATE('${fechaStart} 00:00:00', '%d-%m-%Y %T') AND STR_TO_DATE('${fechaEnd} 23:59:00', '%d-%m-%Y %T');`;
+    } else {
+      query = `SELECT cotizacion.id, cotizacion.fecha_creacion, cotizacion.cliente, u.nombre as NombreU, u.apellido as ApellidoU, ec.nombre as estado, vc.nombre as vigencia FROM cotizacion
+              inner join usuario u on cotizacion.usuario_id = u.id
+              inner join estado_cotizacion ec on cotizacion.estado_id = ec.id
+              inner join vigencia_cotizacion vc on cotizacion.vigencia_id = vc.id
+              WHERE CAST(fecha_creacion as Date)
+              BETWEEN STR_TO_DATE('${fechaStart} 00:00:00', '%d-%m-%Y %T') AND STR_TO_DATE('${fechaEnd} 23:59:00', '%d-%m-%Y %T');`;
+    }
+    return this.repository.query(query);
   }
 }

@@ -99,11 +99,17 @@ export class QuoteController {
     return this.quoteService.updateStatus(id, status);
   }
 
-  @Get('filtroCotizacion/:fechaStart/:fechaEnd')
-  @ApiOperation({ summary: 'Permite obtener las cotizaciones por medio de un rango de fechas' })
-  @ApiOkResponse({status: 200,description: 'Cotizacion Ok'})
-  findDate(@Param('fechaStart') fechaStart: string, @Param('fechaEnd') fechaEnd:string) {
+  @Get('filtroCotizacion/:fechaStart/:fechaEnd/:sucursal')
+  @ApiOperation({
+    summary: 'Permite obtener las cotizaciones por medio de un rango de fechas',
+  })
+  @ApiOkResponse({ status: 200, description: 'Cotizacion Ok' })
+  findDate(
+    @Param('fechaStart') fechaStart: string,
+    @Param('fechaEnd') fechaEnd: string,
+    @Param('sucursal') sucursal: string,
+  ) {
     // console.log(fechaStart, fechaEnd);
-    return this.quoteService.filterDate(fechaStart, fechaEnd);
+    return this.quoteService.filterDate(fechaStart, fechaEnd, sucursal);
   }
 }
