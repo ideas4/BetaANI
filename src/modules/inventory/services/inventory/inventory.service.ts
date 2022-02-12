@@ -429,6 +429,7 @@ export class InventoryService {
           ? element.producto.proveedor.nombre
           : '',
         marca: element.producto.marca ? element.producto.marca.nombre : '',
+        idSucursal: element.sucursal ? element.sucursal.id : '',
       });
     });
     return array;
@@ -485,6 +486,40 @@ export class InventoryService {
       precio_venta: result.producto.precio_venta,
       precio_min: result.producto.precio_min,
       sucursal: result.sucursal ? result.sucursal.nombre : '',
+    };
+    return producto;
+  }
+
+  /**
+   * Obtener un registro del inventario con el producto
+   */
+  async findToFillProductSucursal(id: number, idSucursal: number) {
+    let result = await this.repository
+      .createQueryBuilder('inv')
+      .leftJoinAndSelect('inv.producto', 'producto')
+      .leftJoinAndSelect('inv.sucursal', 'sucursal')
+      .leftJoinAndSelect('producto.proveedor', 'proveedor')
+      .leftJoinAndSelect('producto.marca', 'marca')
+      .where('inv.id = :id', { id })
+      .andWhere('inv.sucursal_id = :idSucursal', { idSucursal })
+      .andWhere('inv.cantidad > 0')
+      .getOne();
+
+    transforPropToString(result.producto, 'proveedor', ['nombre']);
+    transforPropToString(result.producto, 'marca', ['nombre']);
+    var producto = {
+      id: result.id,
+      nombre: result.producto.nombre,
+      proveedor: result.producto.proveedor,
+      marca: result.producto.marca,
+      sku: result.producto.sku,
+      cantidad_disponible: result.cantidad,
+      precio: result.producto.precio_venta,
+      precio_venta: result.producto.precio_venta,
+      precio_min: result.producto.precio_min,
+      sucursal: result.sucursal ? result.sucursal.nombre : '',
+      idSucursal: result.sucursal ? result.sucursal.id : '',
+      idProducto: result.producto.id,
     };
     return producto;
   }

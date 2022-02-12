@@ -90,7 +90,7 @@ export class SendMailService {
             fecha_creacion: moment(order.fecha_creacion).format('DD-MM-YYYY'),
             entrega: order.entrega,
             pago: order.m_pago,
-            envio: order.envio ? order.envio.costo : 0,
+            envio: order.envio_costo,
             total: order.total,
             estado: order.estado,
           },
@@ -300,7 +300,7 @@ export class SendMailService {
       .sendMail({
         to: 'kcalderon@ideas4software.com',
         subject: 'Confirmación de Cuenta',
-        text: 'mensaje de prueba'
+        text: 'mensaje de prueba',
       })
       .then(() => {
         console.log('success');

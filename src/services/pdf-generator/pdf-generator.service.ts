@@ -425,7 +425,7 @@ export class PdfGeneratorService {
                 '',
                 '',
                 {
-                  text: quote.envio ? 'Q.' + quote.envio.costo.toFixed(2) : '-',
+                  text: quote.envio ? 'Q.' + quote.envio.costo : '-',
                   bold: true,
                 },
               ],

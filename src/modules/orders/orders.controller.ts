@@ -33,6 +33,10 @@ import { AuthDataPayload } from '../users/dtos/auth-data.dto';
 import { DeliveryTypeDto } from './dto/delivery-type.dto';
 import { PaymentMethodDto } from './dto/payment-method.dto';
 import { ConfirmSellDto } from './dto/confirm-sell.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { CreateProductDto } from '../inventory/dto/create-product.dto';
+import { ProductOrderDto } from './dto/product-order.dto';
+import { UpdateProductOrderDto } from './dto/update-product-order.dto';
 
 @ApiBearerAuth()
 @Controller('orders')
@@ -158,11 +162,40 @@ export class OrdersController {
     return this.ordersService.getPaymentMethod();
   }
 
+  @Get('inventory/:id/:idSucursal')
+  @ApiOperation({
+    summary: 'Obtener el id del inventario segun el producto y la sucursal',
+  })
+  @ApiOkResponse({ status: 200, description: 'Ordenes Ok' })
+  getInventoryId(
+    @Param('id') id: number,
+    @Param('idSucursal') idSucursal: number,
+  ) {
+    return this.ordersService.getInventario(id, idSucursal);
+  }
+
   @Get('payment-method/:id')
   @ApiOperation({ summary: 'Obtiene un metodo de pago para edicion' })
   @ApiOkResponse({ status: 200, description: 'Ordenes Ok' })
   getPaymentMethodID(@Param('id') id: string) {
     return this.ordersService.getPaymentId(+id);
+  }
+
+  @Put('product-order/:idOrder/:idProducto/:total')
+  @ApiOperation({ summary: 'Crear un producto en una orden' })
+  @ApiOkResponse({ status: 200, description: 'Ordenes Ok' })
+  addProductOrder(
+    @Param('idOrder') idOrder: number,
+    @Param('idProducto') idProducto: string,
+    @Param('total') total: number,
+    @Body() body: ProductOrderDto,
+  ) {
+    return this.ordersService.addProductDetail(
+      idOrder,
+      idProducto,
+      total,
+      body,
+    );
   }
 
   @Put('sell/:id')
@@ -197,11 +230,54 @@ export class OrdersController {
     return this.ordersService.findOne(+id);
   }
 
+  @Put(':id')
+  @ApiOperation({ summary: 'Permite editar una orden.' })
+  @ApiOkResponse({ status: 200, description: 'Ordenes Ok' })
+  updateOrder(@Param('id') id: number, @Body() updateOrderDto: UpdateOrderDto) {
+    return this.ordersService.update(id, updateOrderDto);
+  }
+
   @Put('cancel/:id')
   @ApiOperation({ summary: 'Permite cancelar una orden' })
   @ApiOkResponse({ status: 200, description: 'Ordenes Ok' })
   toCancell(@Param('id') id: string) {
     return this.ordersService.cancelOrder(+id);
+  }
+
+  @Put('deleteProductOrder/:id/:idOrdenProduct')
+  @ApiOperation({
+    summary:
+      'Permite borrar un registro en las ordenes y actualizar el monto de la orden.',
+  })
+  @ApiOkResponse({ status: 200, description: 'Ordenes Ok' })
+  ToDeteleProductoOrder(
+    @Param('id') id: number,
+    @Param('idOrdenProduct') idOrdenProduct: number,
+    @Body() updateOrderDto: UpdateOrderDto,
+  ) {
+    return this.ordersService.deleteProductDetail(
+      id,
+      idOrdenProduct,
+      updateOrderDto,
+    );
+  }
+
+  @Put('updateProductOrder/:idOrdenProduct/:total')
+  @ApiOperation({
+    summary:
+      'Permite editar la cantidad y el descuento de un producto de una orden.',
+  })
+  @ApiOkResponse({ status: 200, description: 'Ordenes Ok' })
+  ToUpdateItemsProductOrder(
+    @Param('idOrdenProduct') idOrdenProduct: number,
+    @Param('total') total: number,
+    @Body() updateProductOrderDto: UpdateProductOrderDto,
+  ) {
+    return this.ordersService.updateProductOrden(
+      idOrdenProduct,
+      total,
+      updateProductOrderDto,
+    );
   }
 
   @Put('delivery/:id')

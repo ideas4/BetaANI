@@ -28,6 +28,11 @@ import { SendMailService } from '../../services/mailer/send-mail.service';
 import { CreditCardsService } from '../accounting/credit-cards/credit-cards.service';
 import { SalesService } from '../sales/sales.service';
 import { ConfirmSellDto } from './dto/confirm-sell.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { findIndex } from 'rxjs/operators';
+import { CreateProductDto } from '../inventory/dto/create-product.dto';
+import { ProductOrderDto } from './dto/product-order.dto';
+import { UpdateProductOrderDto } from './dto/update-product-order.dto';
 
 export interface InventoryAToOrder {
   id_inventario: any;
@@ -388,15 +393,20 @@ export class OrdersService {
     result['entrega_id'] = result.tipo_entrega ? result.tipo_entrega.id : '';
     result['m_pago'] = result.metodo_pago ? result.metodo_pago.nombre : '';
     result['m_pago_id'] = result.metodo_pago ? result.metodo_pago.id : '';
+    result['envio_descrip'] = result.envio ? result.envio.nombre : '';
+    result['envio_costo'] = result.envio ? result.envio.costo : '';
+    result['envio_id'] = result.envio ? result.envio.id : '';
     delete result.estado_orden;
     delete result.tipo_entrega;
     delete result.metodo_pago;
+    delete result.envio;
     result['productos'] = [];
 
     const prods = await this.repositoryproducts
       .createQueryBuilder('prod')
       .leftJoinAndSelect('prod.inventario', 'inventario')
       .leftJoinAndSelect('inventario.producto', 'p')
+      .leftJoinAndSelect('inventario.sucursal', 's')
       .where('ordenId = :id', { id: result.id })
       .getMany();
     prods.forEach((element) => {
@@ -410,6 +420,9 @@ export class OrdersService {
           ? element.inventario.producto.nombre
           : ''
         : '';
+      element['idProducto'] = element.inventario.producto.id;
+      element['idSucursal'] = element.inventario.sucursal.id;
+
       delete element.inventario;
     });
     result['productos'] = prods;
@@ -750,6 +763,9 @@ export class OrdersService {
     }
   }
 
+  /**
+   * Retornar las ordenes por un rango de fecha seleccionado y sucursal
+   */
   async filterDate(fechaStart: string, fechaEnd: string, sucursal: string) {
     let query = ``;
     if (sucursal != 'Todas') {
@@ -769,5 +785,188 @@ export class OrdersService {
     }
 
     return this.repositoryStore.query(query);
+  }
+
+  async update(id: number, updateOrderDto: UpdateOrderDto) {
+    const query = `UPDATE orden
+                          SET orden.metodo_pago_id = ${updateOrderDto.metodo_pago},
+                              orden.fecha_entrega = STR_TO_DATE('${updateOrderDto.fecha_entrega}', '%Y-%m-%d'),
+                              orden.no_guia = ${updateOrderDto.no_guia},
+                              orden.tipo_entrega_id = ${updateOrderDto.entrega},
+                              orden.envio_id = ${updateOrderDto.envio}
+                          where orden.id = ${id};`;
+
+    return await this.repository.query(query);
+  }
+
+  async getInventario(idProducto: number, idSucursal: number) {
+    return await this.repositoryproducts.query(
+      `select * from inventario
+      where inventario.producto_id = ${idProducto} AND inventario.sucursal_id = ${idSucursal}`,
+    );
+  }
+
+  async addProductDetail(
+    idOrden: number,
+    idInventario: string,
+    total: number,
+    productOrder: ProductOrderDto,
+  ) {
+    // //ACTUALIZA EL INVENTARIO
+    let inventario = await this.repositoryproducts.query(
+      `select * from inventario where inventario.id = ${idInventario}`,
+    );
+
+    let cantidadNueva: number = productOrder.cantidad;
+    let cantidadReservada = inventario?.[0]?.cantidad_reservada;
+    let cantidad = inventario?.[0]?.cantidad;
+
+    cantidadReservada = Number(cantidadReservada) + Number(cantidadNueva);
+    cantidad = Number(cantidad) - Number(productOrder.cantidad);
+
+    //RESERVAR PRODUCTO EN INVENTARIO
+    let updateInventario = await this.repositoryproducts
+      .query(`UPDATE inventario
+    SET cantidad = ${cantidad},
+        cantidad_reservada = ${cantidadReservada}
+    where inventario.id = ${idInventario}`);
+
+    //guardar producto de orden
+    let addOrdenProduct = await this.repositoryproducts
+      .query(`insert into orden_producto (cantidad, precio, descuento, justificacion_descuento, ordenId, inventario_id)
+    values (${productOrder.cantidad},${productOrder.precio},${productOrder.descuento},'${productOrder.justificacion_descuento}',${idOrden},${productOrder.id_inventario}) `);
+
+    //ACTUALIZAR PRECIO DE LA ORDEN
+    let query2 = await this.repository.query(`
+        update orden SET total = ${total} where id = ${idOrden}`);
+  }
+
+  //BORRA UN REGISTRO DE UNA ORDEN
+  async deleteProductDetail(
+    id: number,
+    idOrdenProduct: number,
+    updateOrderDto: UpdateOrderDto,
+  ) {
+    //console.log(updateOrderDto.total);
+    let cantidadProducto = await this.repositoryproducts.query(
+      `select cantidad from orden_producto where id= ${idOrdenProduct}`,
+    );
+
+    let valueCantidadProducto = cantidadProducto?.[0]?.cantidad;
+
+    //LIBERAR INVENTARIO RESERVADO
+    let inventario = await this.repositoryproducts
+      .query(`select i.cantidad, i.cantidad_reservada, i.id from orden_producto
+      inner join inventario i on orden_producto.inventario_id = i.id
+      where orden_producto.id = ${idOrdenProduct};
+      `);
+
+    let valueCantidadReservada = inventario?.[0]?.cantidad_reservada;
+    let valueCantidad = inventario?.[0]?.cantidad;
+    let idInventario = inventario?.[0]?.id;
+
+    // console.log('cantidad reservada invt' + valueCantidadReservada);
+    // console.log('cantidad invt' + valueCantidad);
+
+    valueCantidad = valueCantidad + valueCantidadProducto;
+    valueCantidadReservada = valueCantidadReservada - valueCantidadProducto;
+
+    let updateInventario = await this.repositoryproducts
+      .query(`UPDATE inventario
+      SET cantidad = ${valueCantidad},
+          cantidad_reservada = ${valueCantidadReservada}
+      where inventario.id = ${idInventario}`);
+
+    //ELIMINA EL REGISTO DE LA TABLA ORDEN_PRODUCTO
+    let query = await this.repositoryproducts.query(
+      `delete from orden_producto where orden_producto.id = ${idOrdenProduct};`,
+    );
+
+    //ACTUALIZAR PRECIO DE LA ORDEN
+    let query2 = await this.repositoryproducts.query(`
+        update orden SET total = ${updateOrderDto.total} where id = ${id}`);
+  }
+
+  async updateProductOrden(
+    idordenProduct: number,
+    total: number,
+    updateProductOrderDto: UpdateProductOrderDto,
+  ) {
+    //obtener id de inventario por medio del id de Orden product
+    let inventario = await this.repositoryproducts
+      .query(`select inventario.id, inventario.cantidad, inventario.cantidad_reservada, op.cantidad as cantidadOrdenProduct, op.ordenId from inventario
+    inner join orden_producto op on inventario.id = op.inventario_id
+    where op.id = ${idordenProduct};`);
+
+    let idOrden = inventario?.[0]?.ordenId;
+    let cantidadProductoOrdenActual = inventario?.[0]?.cantidadOrdenProduct;
+    let inventarioCantidad = inventario?.[0]?.cantidad;
+    let inventarioReserva = inventario?.[0]?.cantidad_reservada;
+    let idInventario = inventario?.[0]?.id;
+
+    // console.log(idOrden);
+    // console.log(cantidadProductoOrdenActual);
+    // console.log(inventarioCantidad);
+    // console.log(inventarioReserva);
+
+    if (updateProductOrderDto.cantidad > inventarioCantidad) {
+      throw new HttpException(
+        'La cantidad ingresada es mayor a cantidad disponible en el inventario.',
+        HttpStatus.BAD_REQUEST,
+      );
+    } else {
+      if (updateProductOrderDto.cantidad > cantidadProductoOrdenActual) {
+        //LIBERA PRODUCTOS de inventario
+        let aux = updateProductOrderDto.cantidad - cantidadProductoOrdenActual;
+
+        inventarioCantidad = inventarioCantidad - aux;
+        inventarioReserva = inventarioReserva + aux;
+
+        let updateInventario = await this.repositoryproducts
+          .query(`UPDATE inventario
+        SET cantidad = ${inventarioCantidad},
+            cantidad_reservada = ${inventarioReserva}
+        where inventario.id = ${idInventario}`);
+
+        //MODIFICA ORDEN PRODUCT CANTIDAD
+        let updateModificarProduct = await this.repository.query(
+          `UPDATE orden_producto SET cantidad=${updateProductOrderDto.cantidad}, descuento=${updateProductOrderDto.descuento}, justificacion_descuento='${updateProductOrderDto.justificacion_descuento}' where id =${idordenProduct};`,
+        );
+
+        //MODIFICA TOTAL DE ORDEN
+        let query2 = await this.repositoryproducts.query(`
+        update orden SET total = ${total} where id = ${idOrden}`);
+      } else if (updateProductOrderDto.cantidad < cantidadProductoOrdenActual) {
+        //LIBERA PRODUCTOS de inventario
+        let aux = cantidadProductoOrdenActual - updateProductOrderDto.cantidad;
+
+        inventarioCantidad = inventarioCantidad + aux;
+        inventarioReserva = inventarioReserva - aux;
+
+        let updateInventario = await this.repositoryproducts
+          .query(`UPDATE inventario
+        SET cantidad = ${inventarioCantidad},
+            cantidad_reservada = ${inventarioReserva}
+        where inventario.id = ${idInventario}`);
+
+        //MODIFICA ORDEN PRODUCT CANTIDAD
+        let updateModificarProduct = await this.repository.query(
+          `UPDATE orden_producto SET cantidad=${updateProductOrderDto.cantidad}, descuento=${updateProductOrderDto.descuento}, justificacion_descuento='${updateProductOrderDto.justificacion_descuento}' where id =${idordenProduct};`,
+        );
+
+        //MODIFICA TOTAL DE ORDEN
+        let query2 = await this.repositoryproducts.query(`
+        update orden SET total = ${total} where id = ${idOrden}`);
+      } else {
+        //MODIFICA ORDEN PRODUCT CANTIDAD
+        let updateModificarProduct = await this.repository.query(
+          `UPDATE orden_producto SET cantidad=${updateProductOrderDto.cantidad}, descuento=${updateProductOrderDto.descuento}, justificacion_descuento='${updateProductOrderDto.justificacion_descuento}' where id =${idordenProduct};`,
+        );
+
+        //MODIFICA TOTAL DE ORDEN
+        let query2 = await this.repositoryproducts.query(`
+        update orden SET total = ${total} where id = ${idOrden}`);
+      }
+    }
   }
 }
