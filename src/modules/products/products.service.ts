@@ -139,6 +139,34 @@ export class ProductsService {
   }
 
   /**
+   * Mostrar lista de todos los productos
+   */
+  async findAllPrueba() {
+    const result = await this.repository
+      .createQueryBuilder('prod')
+      .select([
+        'prod.id',
+        'prod.sku',
+        'prod.nombre',
+        'prod.showInStore',
+        'prod.precio_original',
+        'prod.precio_venta',
+
+        'brand.nombre',
+        'supplier.nombre',
+      ])
+      .innerJoin('prod.marca', 'brand')
+      .innerJoin('prod.proveedor', 'supplier')
+
+      .where('prod.isDeleted is false')
+      .orderBy('prod.id')
+      .getMany();
+    transforPropToString(result, 'marca', ['nombre']);
+    transforPropToString(result, 'proveedor', ['nombre']);
+    return result;
+  }
+
+  /**
    * Mostrar info de producto para editar
    * @param id de producto
    */
@@ -152,6 +180,7 @@ export class ProductsService {
         'prod.descripcion',
         'prod.precio_original',
         'prod.precio_venta',
+        'prod.showInStore',
         'prod.bos',
         'prod.ultimo_costo',
         'prod.precio_min',
@@ -194,6 +223,7 @@ export class ProductsService {
         'prod.descripcion',
         'prod.precio_original',
         'prod.precio_venta',
+        'prod.showInStore',
         'prod.bos',
         'prod.ultimo_costo',
         'prod.costo_promedio',
