@@ -318,4 +318,52 @@ export class SendMailService {
   private getURLImagen(imagen: string) {
     return this.info.url_imagenes + 'config/' + imagen;
   }
+
+  /**
+   * Enviar correo de factura
+   * @param
+   * @param pdf_name
+   */
+  public async sendBill(
+    correo: string,
+    nombre: string,
+    dte: string,
+    fecha: string,
+    serie: string,
+  ) {
+    await this.refreshConfig();
+    console.log('enviando factura...');
+    this.mailerService
+      .sendMail({
+        to: correo,
+        subject: 'Envio de DTE ' + dte,
+        template: 'bill-mail',
+        context: {
+          // Data to be sent to template engine.
+          logo: this.info.logo,
+          nombre_cliente: nombre,
+          fecha: fecha,
+          serie: serie,
+          noDocumento: dte,
+
+          empresa: {
+            correo: this.info.correo,
+            direccion: this.info.direccion,
+          },
+        },
+        attachments: [
+          {
+            filename: dte,
+            path: 'uploads/docs/' + dte + '.pdf',
+            contentType: 'application/pdf',
+          },
+        ],
+      })
+      .then(() => {
+        console.log('success');
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
 }

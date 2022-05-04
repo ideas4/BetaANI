@@ -1,4 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Account } from '../../accounts/entities/account.entity';
 import { Deposit } from '../../deposits/entities/deposit.entity';
 import { Check } from '../../checks/entities/check.entity';
@@ -8,46 +14,45 @@ import { MoneyWithdraw } from '../../money-withdraw/entities/money-withdraw.enti
 
 @Entity('detalle_libro_diario')
 export class LogBook {
-
   @PrimaryGeneratedColumn()
-  id:number;
+  id: number;
 
-  @Column({type:'datetime'})
-  fecha:Date;
+  @Column({ type: 'datetime' })
+  fecha: Date;
 
   @Column()
-  concepto:string;
+  concepto: string;
 
-  @Column({type:'double'})
-  total:number;
+  @Column({ type: 'double' })
+  total: number;
 
-  @Column({type:'int'})
-  deber:number;
+  @Column({ type: 'int' })
+  deber: number;
 
-  @Column({type:'int'})
-  haber:number;
+  @Column({ type: 'int' })
+  haber: number;
 
-  @ManyToOne(()=>Account)
-  @JoinColumn({name:'cuenta_id'})
-  cuenta:Account;
+  @ManyToOne(() => Account)
+  @JoinColumn({ name: 'cuenta_id' })
+  cuenta: Account;
 
-  @ManyToOne(()=>User)
-  @JoinColumn({name:'usuario_id'})
-  usuario:User;
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'usuario_id' })
+  usuario: User;
 
-  @ManyToOne(()=>Deposit)
-  @JoinColumn({name:'deposito_id'})
-  deposito:Deposit;
+  @ManyToOne(() => Deposit)
+  @JoinColumn({ name: 'deposito_id' })
+  deposito: Deposit;
 
-  @ManyToOne(()=>Check)
-  @JoinColumn({name:'cheque_id'})
-  cheque:Check;
+  @ManyToOne(() => Check)
+  @JoinColumn({ name: 'cheque_id' })
+  cheque: Check;
 
-  @ManyToOne(()=>SaleEntity)
-  @JoinColumn({name:'venta_id'})
-  venta:SaleEntity;
+  @ManyToOne(() => SaleEntity)
+  @JoinColumn({ name: 'venta_id' })
+  venta: SaleEntity;
 
-  @ManyToOne(()=>MoneyWithdraw)
-  @JoinColumn({name:'retiro_id'})
-  retiro:MoneyWithdraw;
+  @ManyToOne(() => MoneyWithdraw)
+  @JoinColumn({ name: 'retiro_id' })
+  retiro: MoneyWithdraw;
 }

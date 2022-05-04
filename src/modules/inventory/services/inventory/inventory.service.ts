@@ -430,6 +430,7 @@ export class InventoryService {
           : '',
         marca: element.producto.marca ? element.producto.marca.nombre : '',
         idSucursal: element.sucursal ? element.sucursal.id : '',
+        precio_venta: element.producto.precio_venta,
       });
     });
     return array;

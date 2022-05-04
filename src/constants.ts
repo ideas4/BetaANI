@@ -5,7 +5,7 @@ export const JWT_SECRET = 'gi4S2020_007*';
 export const CRYPTO_SECRET = 'gi4S2+020_007';
 export const CANT_ROL_ADMIN = 5;
 
-// DATABASE TECNIPLAST
+// DATABASE DEMOANI
 export const DatabaseInfo = {
   host: 'db-mysql-nyc1-38997-do-user-8600954-0.b.db.ondigitalocean.com',
   port: 25060,
@@ -14,6 +14,15 @@ export const DatabaseInfo = {
   database: 'demoANI',
   insecureAuth: true,
 };
+
+// DATABASE LOCAL
+// export const DatabaseInfo = {
+//   host: 'localhost',
+//   username: 'root',
+//   password: '',
+//   database: 'manualid',
+//   insecureAuth: true,
+// };
 
 export const enum Roles {
   ADMINISTRADOR = 1,

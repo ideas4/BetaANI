@@ -8,8 +8,10 @@ import { AccountsModule } from './accounts/accounts.module';
 import { CreditCardsModule } from './credit-cards/credit-cards.module';
 import { LogBookModule } from './log-book/log-book.module';
 import { MoneyWithdrawModule } from './money-withdraw/money-withdraw.module';
+import { AccountingItemsModule } from './accounting-items/accounting-items.module';
+import { LedgerAccountsModule } from './ledger-accounts/ledger-accounts.module';
 
 @Module({
-  imports: [BanksModule, BankAccountsModule, DepositsModule, AccountingMovementsModule, ChecksModule, AccountsModule, CreditCardsModule, LogBookModule, MoneyWithdrawModule]
+  imports: [BanksModule, BankAccountsModule, DepositsModule, AccountingMovementsModule, ChecksModule, AccountsModule, CreditCardsModule, LogBookModule, MoneyWithdrawModule, AccountingItemsModule, LedgerAccountsModule]
 })
 export class AccountingModule {}

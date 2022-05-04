@@ -56,7 +56,8 @@ import { DetailPriceSheet } from './modules/price-sheet/detail-price-sheet/entit
 import { ClientPriceSheet } from './modules/price-sheet/client-price-sheet/entities/client-priceSheet.entity';
 import { Appointment } from './modules/appointment/entities/appointment.entity';
 import { AppointmentType } from './modules/appointment/appointment-type/entities/appointment-type.entity';
-
+import { AccountingItems } from './modules/accounting/accounting-items/entities/accounting-items.entity';
+import { LedgerAccounts } from './modules/accounting/ledger-accounts/entities/ledger-accounts.entity';
 export const ENTITIES = [
   Color,
   Spec,
@@ -73,6 +74,7 @@ export const ENTITIES = [
   User,
   Account,
   AccountingMovement,
+  AccountingItems,
   AccountType,
   AccountingMovementType,
   Appointment,
@@ -114,6 +116,7 @@ export const ENTITIES = [
   Check,
   CreditCard,
   LogBook,
+  LedgerAccounts,
   MoneyWithdraw,
   MoneyWithdrawType,
   QuoteClientEntity,
