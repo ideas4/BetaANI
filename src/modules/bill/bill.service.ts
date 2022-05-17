@@ -96,4 +96,15 @@ export class BillService {
     );
     this.sendmails.sendBill(correo, nombre, dte, fecha, serie);
   }
+
+  async listBillsActive() {
+    return this.billRepository
+      .query(`select tipo, serie, numero, dte, fecha_certificacion, fecha, nit_cliente, razonsocial_cliente, estado from encabezado_factura where encabezado_factura.estado = 1;
+    `);
+  }
+
+  async listBillsCancel() {
+    return this.billRepository.query(`
+    select tipo, serie, numero, dte, fecha_anulacion, nit_cliente, razonsocial_cliente, estado from encabezado_factura where encabezado_factura.estado = 0;`);
+  }
 }

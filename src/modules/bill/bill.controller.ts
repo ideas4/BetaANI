@@ -59,10 +59,24 @@ export class BillController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Permite obtener una lista de facturas' })
+  @ApiOperation({ summary: 'Permite obtener todo el listado de facturas' })
   @ApiOkResponse({ status: 200, description: 'Facturas Ok' })
   findAll() {
     return this.readonly.findAll();
+  }
+
+  @Get('active')
+  @ApiOperation({ summary: 'Permite obtener el listado de facturas activas' })
+  @ApiOkResponse({ status: 200, description: 'Facturas Ok' })
+  listBillActive() {
+    return this.readonly.listBillsActive();
+  }
+
+  @Get('cancel')
+  @ApiOperation({ summary: 'Permite obtener el listado de facturas anuladas' })
+  @ApiOkResponse({ status: 200, description: 'Facturas Ok' })
+  listBillCancel() {
+    return this.readonly.listBillsCancel();
   }
 
   @Put(':tipo/:serie/:numero')
