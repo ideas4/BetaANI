@@ -11,6 +11,7 @@ const htmlToPdfMake = require('html-to-pdfmake');
 
 import { ConfigService } from '../../modules/configurations/config-admin/config.service';
 import { QuoteEntity } from '../../modules/quote/entities/quote.entity';
+import { ConfiguracionFelService } from 'src/modules/configuracion-fel/configuracion-fel.service';
 
 const fonts = {
   Roboto: {
@@ -833,7 +834,8 @@ export class PdfGeneratorService {
     let aux = this.info.logo.split('/');
     // this.info.logo =
     //   aux[0] + '//' + aux[2] + '/' + aux[3] + '/config/' + 'logomed.png';
-
+    const nit_emisor = await this.configService.getNitEmisor();
+    //console.log(nit_emisor[0].nit_emisor);
     const imageFel = await this.getImageFromURL(
       'https://d1lofqbqbj927c.cloudfront.net/sonoraGT/2021/08/27ag.png',
       this.default_logo,
@@ -872,6 +874,11 @@ export class PdfGeneratorService {
               {
                 fontSize: 8,
                 text: this.info.telefono,
+                alignment: 'center',
+              },
+              {
+                fontSize: 8,
+                text: 'NIT: ' + nit_emisor[0].nit_emisor,
                 alignment: 'center',
               },
             ],

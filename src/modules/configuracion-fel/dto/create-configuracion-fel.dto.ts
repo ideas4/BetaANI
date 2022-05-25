@@ -1,46 +1,38 @@
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty } from 'class-validator';
 
-export class CreateConfiguracionFelDto{
-    @IsNotEmpty()
-    id: number;
+export class CreateConfiguracionFelDto {
+  @IsNotEmpty()
+  id: number;
 
-    url_api_cert: string;
-    
-    usuario: string;
+  url_api_cert: string;
 
-    
-    clave: string;
+  usuario: string;
 
-  
-    cliente: string;
+  clave: string;
 
-   
-    contrato: string;
+  cliente: string;
 
-  
-    ip_origen: string;
+  contrato: string;
 
-    
-    nit_emisor: string;
+  ip_origen: string;
 
-    
-    nombre_emisor: string;
+  nit_emisor: string;
 
-   
-    nombre_comercial_emisor: string;
+  nombre_emisor: string;
 
+  nombre_comercial_emisor: string;
 
-    direccion_emisor: string;
+  direccion_emisor: string;
 
-  
-    cp_emisor: string;
+  cp_emisor: string;
 
-  
-    municipio_emisor: string;
+  municipio_emisor: string;
 
-  
-    depto_emisor: string;
+  depto_emisor: string;
 
+  pais_emisor: string;
 
-    pais_emisor: string;
+  no_establecimiento: string;
+
+  tipo_factura: string;
 }
