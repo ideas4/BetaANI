@@ -1159,6 +1159,406 @@ export class PdfGeneratorService {
     PdfGeneratorService.generatePDF(docDefinition, dte + '.pdf');
   }
 
+  async generateBillFCAMPdf(
+    nit: string,
+    nombre: string,
+    direccion: string,
+    correo: string,
+    detalle: any,
+    dte: string,
+    serie: string,
+    numero: string,
+    fecha_certificado: string,
+    condicion_pago: string,
+    orden_compra: string,
+    no_envio: string,
+    correlativo: string,
+  ) {
+    await this.refreshConfiguration();
+    //console.log(this.info.logo);
+    let aux = this.info.logo.split('/');
+    const txtCondicion =
+      'CONDICIONES GENERALES DE LA VENTA: 1. Al cancelar esta factura sírvase su recibo como único comprobante de pago. 2. Esta factura cambiaría es exigible a su vencimiento y causa interés de mora al__% mensual y el incumplimiento de la obligación causará gastos administrativos y judiciales hasta hacer efectivo su cumplimiento. 3. No se aceptan reclamos ni devoluciones después de 8 días de haberse entregado el producto. 4. El comprador acepta y reconoce como obligatorias las condiciones del valor total de esta Factura Cambiaria Libre de Protesto y se compromete a cancelarla a su vencimiento al vendedor o a través de una entidad bancaria que este nombre. En caso de incumplimiento, el comprador renuncia expresamente al fuero de su domicilio y se somete a los tribunales de Guatemala, señalando lugar para recibir notificaciones, citaciones emplazamientos la dirección actual de su negocio o bien el que esté inscrito en el Registro Mercantil de la República, salvo aviso de cambio que diere por escrito con previa anticipación. La firma legible o ilegible de cualquier representante, dependiente o colaborador del comprador, dará por considerada la aceptación de esta Factura Cambiaria y obligará a este a cumplir con todas las condiciones en la misma. 6. En caso de producto defectuoso, la empresa responde únicamente por el valor del mismo';
+    // this.info.logo =
+    //   aux[0] + '//' + aux[2] + '/' + aux[3] + '/config/' + 'logomed.png';
+    const nit_emisor = await this.configService.getNitEmisor();
+    //console.log(nit_emisor[0].nit_emisor);
+    const imageFel = await this.getImageFromURL(
+      'https://d1lofqbqbj927c.cloudfront.net/sonoraGT/2021/08/27ag.png',
+      this.default_logo,
+    );
+    const image = await this.getImageFromURL(this.info.logo, this.default_logo);
+    const { total, products } = await this.getFormatedDataBill(detalle);
+
+    const docDefinition = {
+      content: [
+        // ENCABEZADO IZQUIERDA
+        {
+          style: 'superHeader',
+          columns: [
+            {
+              width: '35%',
+              image: image,
+              fit: [100, 100],
+            },
+            //ENCABEZADO CENTRO
+            [
+              {
+                fontSize: 8,
+                text: this.info.nombre,
+                alignment: 'center',
+              },
+              {
+                fontSize: 8,
+                text: this.info.direccion,
+                alignment: 'center',
+              },
+              {
+                fontSize: 8,
+                text: this.info.correo,
+                alignment: 'center',
+              },
+              {
+                fontSize: 8,
+                text: this.info.telefono,
+                alignment: 'center',
+              },
+              {
+                fontSize: 8,
+                text: 'NIT: ' + nit_emisor[0].nit_emisor,
+                alignment: 'center',
+              },
+            ],
+            //ENCABEZADO DERECHO
+            [
+              {
+                fontSize: 6,
+                text: 'DOCUMENTO TRIBUTARIO ELECTRONICO',
+                alignment: 'center',
+                bold: true,
+              },
+              {
+                fontSize: 6,
+                text: dte,
+                alignment: 'center',
+                bold: true,
+              },
+              {
+                fontSize: 6,
+                text: '###',
+                alignment: 'center',
+                color: '#FFFFFF',
+              },
+              {
+                fontSize: 8,
+                text: 'FACTURA',
+                alignment: 'center',
+              },
+              {
+                fontSize: 8,
+                text: 'SERIE: ' + serie,
+                alignment: 'center',
+              },
+              {
+                fontSize: 8,
+                text: 'NÚMERO: ' + numero,
+                alignment: 'center',
+              },
+              {
+                fontSize: 8,
+                text: 'MONEDA: Quetzales',
+                alignment: 'center',
+              },
+            ],
+          ],
+        },
+        { text: 'Factura', style: ['header'] },
+        {
+          columns: [
+            //CLIENTE (MITAD IZQUIERDA)
+            [
+              {
+                style: 'table',
+                layout: 'noBorders',
+                table: {
+                  widths: ['auto', '*'],
+                  headerRows: 1,
+                  body: [
+                    ['Cliente: ', nombre],
+                    ['Dirección: ', direccion],
+                    ['Orden de compra: ', orden_compra],
+                    ['No. Envío: ', no_envio],
+                  ],
+                },
+              },
+            ],
+            //CLIENTE (MITAD DERECHA)
+            [
+              {
+                style: 'table',
+                layout: 'noBorders',
+                table: {
+                  widths: ['auto', '*'],
+                  headerRows: 1,
+                  body: [
+                    ['Fecha: ', moment().format('DD/MM/YY, h:mm:ss a')],
+                    ['NIT: ', nit],
+                    ['Correlativo: ', correlativo],
+                  ],
+                },
+              },
+            ],
+          ],
+        },
+        //TABLA DE PRODUCTOS
+        { text: 'Detalle de Factura', style: 'subheader' },
+        {
+          style: 'table',
+          layout: {
+            hLineWidth: function (i, node) {
+              if (i === 0 || i === node.table.body.length) {
+                return 0;
+              }
+              return i === node.table.headerRows ? 2 : 1;
+            },
+            vLineWidth: function (i, node) {
+              return 0;
+            },
+            hLineColor: function (i) {
+              return i === 1 ? 'black' : '#aaa';
+            },
+            paddingLeft: function (i) {
+              return i === 0 ? 0 : 8;
+            },
+            paddingRight: function (i, node) {
+              return i === node.table.widths.length - 1 ? 0 : 8;
+            },
+            fillColor: function (rowIndex) {
+              return rowIndex % 2 != 0 && rowIndex > 0 && rowIndex < 0
+                ? '#dee0e3'
+                : null;
+            },
+          },
+          table: {
+            widths: ['auto', '*', 'auto', 'auto'],
+            headerRows: 1,
+            body: [
+              [
+                {
+                  text: 'Cantidad',
+                  bold: true,
+                  fillColor: '#363386',
+                  color: '#FFFFFF',
+                  alignment: 'center',
+                },
+                {
+                  text: 'Descripción',
+                  bold: true,
+                  fillColor: '#363386',
+                  color: '#FFFFFF',
+                  alignment: 'center',
+                },
+                {
+                  text: 'Precio Unitario',
+                  bold: true,
+                  fillColor: '#363386',
+                  color: '#FFFFFF',
+                  alignment: 'center',
+                },
+                {
+                  text: 'Total',
+                  bold: true,
+                  fillColor: '#363386',
+                  color: '#FFFFFF',
+                  alignment: 'center',
+                },
+              ],
+              ...products,
+              [
+                { text: 'Total', bold: true },
+                '',
+                '',
+                { text: 'Q.' + total.toFixed(2), bold: true },
+              ],
+            ],
+          },
+        },
+        //SALTO DE LINEA
+        {
+          table: {
+            widths: ['*'],
+            body: [[' ']],
+          },
+          layout: {
+            hLineWidth: function (i, node) {
+              return i === 0 || i === node.table.body.length ? 0 : 1;
+            },
+            vLineWidth: function (i, node) {
+              return 0;
+            },
+          },
+        },
+        //TABLA DE LETRAS
+        {
+          style: 'tableExample',
+          table: {
+            widths: ['auto', '*'],
+            body: [
+              [
+                {
+                  text: 'Total en letras',
+                  bold: true,
+                },
+
+                {
+                  text: this.NumeroALetras(total, {}),
+                  alignment: 'center',
+                },
+              ],
+            ],
+          },
+        },
+        //SALTO EN LINEA
+        {
+          table: {
+            widths: ['*'],
+            body: [[' ']],
+          },
+          layout: {
+            hLineWidth: function (i, node) {
+              return i === 0 || i === node.table.body.length ? 0 : 1;
+            },
+            vLineWidth: function (i, node) {
+              return 0;
+            },
+          },
+        },
+        //TABLA DE CONDICION DE PAGO
+        {
+          style: 'tableExample',
+          table: {
+            widths: ['auto', 'auto'],
+            body: [
+              [
+                {
+                  text: 'Complemento:',
+                  bold: true,
+                  fontSize: 6,
+                },
+
+                {
+                  text: 'Condiciones de pago',
+                  alignment: 'center',
+                  fontSize: 6,
+                  bold: true,
+                },
+              ],
+              [
+                {
+                  fontSize: 6,
+                  text: txtCondicion,
+                  alignment: 'justify',
+                },
+                {
+                  text: 'CREDITO ' + condicion_pago + ' DÍAS',
+                  bold: true,
+                  alignment: 'center',
+                },
+              ],
+            ],
+          },
+        },
+        //SALTO EN LINEA
+        {
+          table: {
+            widths: ['*'],
+            body: [[' ']],
+          },
+          layout: {
+            hLineWidth: function (i, node) {
+              return i === 0 || i === node.table.body.length ? 0 : 1;
+            },
+            vLineWidth: function (i, node) {
+              return 0;
+            },
+          },
+        },
+        //INFORMACION CERTIFICADO
+        {
+          style: 'tableExample',
+          layout: 'noBorders',
+          table: {
+            body: [
+              [
+                {
+                  width: '35%',
+                  image: imageFel,
+                  fit: [50, 50],
+                },
+                [
+                  {
+                    fontSize: 6,
+                    text: 'AUTORIZACIÓN: ' + dte,
+                    alignment: 'left',
+                  },
+                  {
+                    fontSize: 6,
+                    text: 'FECHA CERTIFICACIÓN: ' + fecha_certificado,
+                    alignment: 'left',
+                  },
+                  {
+                    fontSize: 6,
+                    text: 'CERTIFICADOR: ' + 'TEKRA, S.A. / NIT: 10734683-4',
+                    alignment: 'left',
+                  },
+                ],
+              ],
+            ],
+          },
+        },
+      ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          margin: [true, true, true, true],
+        },
+        subheader: {
+          fontSize: 16,
+          bold: true,
+          alignment: 'center',
+          margin: [0, 10, 0, 10],
+        },
+        subheader_left: {
+          fontSize: 13,
+          bold: true,
+          alignment: 'left',
+          margin: [0, 10, 0, 10],
+        },
+        table1: {
+          margin: [0, 5, 0, 15],
+        },
+        header_text: {
+          margin: [0, 0, 0, 20],
+        },
+        footer: {
+          margin: [1, 50, 0, 0],
+        },
+        tableHeader: {
+          bold: true,
+          fontSize: 13,
+          color: 'gray',
+          fillColor: '#eeeeee',
+        },
+      },
+      defaultStyle: {
+        fontSize: 10,
+      },
+    };
+    //Generar Documento
+    PdfGeneratorService.generatePDF(docDefinition, dte + '.pdf');
+  }
+
   Unidades(num) {
     switch (num) {
       case 1:

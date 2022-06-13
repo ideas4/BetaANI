@@ -97,6 +97,40 @@ export class BillService {
     this.sendmails.sendBill(correo, nombre, dte, fecha, serie);
   }
 
+  async createPdfAndSendFCAM(
+    nit: string,
+    nombre: string,
+    direccion: string,
+    correo: string,
+    detalle: any,
+    dte: string,
+    fecha: string,
+    serie: string,
+    numero: string,
+    fecha_certificado: string,
+    condicion_pago: string,
+    orden_compra: string,
+    no_envio: string,
+    correlativo: string,
+  ) {
+    this.pdfServices.generateBillFCAMPdf(
+      nit,
+      nombre,
+      direccion,
+      correo,
+      detalle,
+      dte,
+      serie,
+      numero,
+      fecha_certificado,
+      condicion_pago,
+      orden_compra,
+      no_envio,
+      correlativo,
+    );
+    this.sendmails.sendBill(correo, nombre, dte, fecha, serie);
+  }
+
   async listBillsActive() {
     return this.billRepository
       .query(`select tipo, serie, numero, dte, fecha_certificacion, fecha, nit_cliente, razonsocial_cliente, estado from encabezado_factura where encabezado_factura.estado = 1;

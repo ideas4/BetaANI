@@ -58,6 +58,30 @@ export class BillController {
     );
   }
 
+  @Post('generateFCAM')
+  @ApiOperation({ summary: 'Permite crear el pdf de la factura' })
+  @ApiOkResponse({ status: 200, description: 'Factura OK' })
+  @ApiNotAcceptableResponse({ description: 'La factura ya existe' })
+  createBillFCAMGeneratePdf(@Body() dataBill: any) {
+    // console.log(dataBill.condicion_pago);
+    return this.readonly.createPdfAndSendFCAM(
+      dataBill.nit,
+      dataBill.nombre,
+      dataBill.direccion,
+      dataBill.correo,
+      dataBill.detalle,
+      dataBill.dte,
+      dataBill.fecha,
+      dataBill.serie,
+      dataBill.numero,
+      dataBill.fecha_certificado,
+      dataBill.condicion_pago,
+      dataBill.orden_compra,
+      dataBill.no_envio,
+      dataBill.correlativo,
+    );
+  }
+
   @Get()
   @ApiOperation({ summary: 'Permite obtener todo el listado de facturas' })
   @ApiOkResponse({ status: 200, description: 'Facturas Ok' })
