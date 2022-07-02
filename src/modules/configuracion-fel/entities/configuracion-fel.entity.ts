@@ -52,4 +52,13 @@ export class ConfiguracionFel {
 
   @Column({ name: 'tipo_factura' })
   tipo_factura: string;
+
+  @Column({ name: 'tipo_frase' })
+  tipo_frase: string;
+
+  @Column({ name: 'codigo_escenario' })
+  codigo_escenario: string;
+
+  @Column({ name: 'texto' })
+  texto: string;
 }

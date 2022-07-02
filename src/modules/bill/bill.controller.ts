@@ -55,6 +55,7 @@ export class BillController {
       dataBill.serie,
       dataBill.numero,
       dataBill.fecha_certificado,
+      dataBill.texto,
     );
   }
 
@@ -79,6 +80,7 @@ export class BillController {
       dataBill.orden_compra,
       dataBill.no_envio,
       dataBill.correlativo,
+      dataBill.texto,
     );
   }
 

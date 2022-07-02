@@ -82,6 +82,7 @@ export class BillService {
     serie: string,
     numero: string,
     fecha_certificado: string,
+    texto: string,
   ) {
     this.pdfServices.generateBillPdf(
       nit,
@@ -93,6 +94,7 @@ export class BillService {
       serie,
       numero,
       fecha_certificado,
+      texto,
     );
     this.sendmails.sendBill(correo, nombre, dte, fecha, serie);
   }
@@ -112,6 +114,7 @@ export class BillService {
     orden_compra: string,
     no_envio: string,
     correlativo: string,
+    texto: string,
   ) {
     this.pdfServices.generateBillFCAMPdf(
       nit,
@@ -127,6 +130,7 @@ export class BillService {
       orden_compra,
       no_envio,
       correlativo,
+      texto,
     );
     this.sendmails.sendBill(correo, nombre, dte, fecha, serie);
   }

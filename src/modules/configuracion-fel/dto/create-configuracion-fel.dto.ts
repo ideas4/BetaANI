@@ -35,4 +35,10 @@ export class CreateConfiguracionFelDto {
   no_establecimiento: string;
 
   tipo_factura: string;
+
+  tipo_frase: string;
+
+  codigo_escenario: string;
+
+  texto: string;
 }
